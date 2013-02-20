@@ -3,7 +3,7 @@
 		<tr><td><span>Ask a question:</span></td><td><input id="vote-question" type="text" name="strQuestion"></td></tr>
 		<tr><td><span>Set deadline:</span></td><td><input id="expire-date" type="date" name="strExpireDate"></td></tr>
 		<tr><td colspan="2" id="uploadedImages"><input id="files-upload" name="objFiles[]" type="file" accept="image/gif, image/png, image/jpeg" multiple >
-		<div id="uploadedImges" stype="display:none">
+		<div id="uploadedImges" style="display:none">
 		<table id="imgs">
 			<tr>
 			<td><canvas id="canvas_0" width=160 height=90 /></td>
@@ -25,13 +25,5 @@
 <input type="submit" name="submit1" value="Submit">
 </form>
 <br />
-<br />
-<br />
 
-For debugging uploadImage
-<form action="uploadImage.php" method="post"
-enctype="multipart/form-data">
-<label for="file">Filename:</label>
-<input type="file" name="file" id="file"><br>
-<input type="submit" name="submit" value="Submit">
-</form>
+

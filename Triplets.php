@@ -2,15 +2,6 @@
 
 include "CommonDBFunctions.php";
 
-//SELECT * from vote_task WHERE expire_date > NOW() and assign_to REGEXP '1;'
-$result = mysql_query('SELECT * from vote_task WHERE expire_date > NOW() and assign_to REGEXP \''.$userid.';\';',$link);
-if (!$result) {
-    die('Invalid query: ' . mysql_error());
-}
-
-$num=mysql_numrows($result);
-
-
 ?>
 
 
@@ -73,9 +64,23 @@ $num=mysql_numrows($result);
 			width: 600,
 			buttons: [
 				{
-					text: "Ok",
+					text: "Vote",
 					click: function() {
-						$( this ).dialog( "close" );
+//						$("#voteForm").ajaxForm({url: 'voteAndComment.php', type: 'post'});
+
+				    var url = "voteAndComment.php"; // the script where you handle the form input.
+				
+				    $.ajax({
+				           type: "POST",
+				           url: url,
+				           data: $("#voteForm").serialize(), // serializes the form's elements.
+				           async:false,
+				           success: function(data)
+				           {
+				               alert(data); // show response from the php script.
+				           }
+				         });
+//						$( this ).dialog( "close" );
 					}
 				},
 				{
@@ -87,8 +92,63 @@ $num=mysql_numrows($result);
 			]
 		});
 		
+		function doAjaxViewAndVoteForm(pageIndex){
+	    var url = "viewAndVoteForm.php"; // the script where you handle the form input.
+	
+	    $.ajax({
+	           type: "POST",
+	           url: url,
+				     data: "page="+pageIndex, // set page.
+	           async:false,
+	           success: function(data)
+	           {
+	               $("#dialog" ).html(data); // show response from the php script.
+	           }
+	         });
+		}
+		
+		$( "#dialog" ).ready(function(){
+	    $("#nextPageClick").click(function(e){ 
+	//       alert("OK");
+	       var currentPage=parseInt($("#currentPage").val());
+	       currentPage++;
+	       doAjaxViewAndVoteForm(currentPage);
+	       $("#currentPage").val(currentPage);
+	       e.preventDefault();
+	       
+	    });
+	    $("#lastPageClick").click(function(e){ 
+	//       alert("OK");
+	       var currentPage=parseInt($("#currentPage").val());
+	       currentPage--;
+	       doAjaxViewAndVoteForm(currentPage);
+	       $("#currentPage").val(currentPage);
+	       e.preventDefault();
+	       
+	    });	  });	
+
+		
 		// Link to open the dialog
 		$( "#dialog-link" ).click(function( event ) {
+			if($("#spanVoteTaskCount").html()=="0")return;
+			//Use Ajax to get dialog content
+			doAjaxViewAndVoteForm(0);
+	         //If it inludes multiple page, set next page visible.
+			if(parseInt($("#spanVoteTaskCount").html())>1){
+				$("#nextVote").show();
+			}
+
+    $("#nextPageClick").click(function(e){ 
+//       alert("OK");
+       var currentPage=parseInt($("#currentPage").val());
+       currentPage++;
+       doAjaxViewAndVoteForm(currentPage);
+       $("#currentPage").val(currentPage);
+       e.preventDefault();
+       
+    });
+
+	     	
 			$( "#dialog" ).dialog( "open" );
 			event.preventDefault();
 		});
@@ -234,6 +294,8 @@ $num=mysql_numrows($result);
     	
     };
     
+ 
+   
 		$("#files-upload").change( function () {
 			if(this.files.length!==3){
 				alert('please select 3 image files!');
@@ -303,6 +365,8 @@ $num=mysql_numrows($result);
 				  return true;
 				});
 		
+		
+		
 	});
 	</script>
 	<style>
@@ -359,33 +423,16 @@ $num=mysql_numrows($result);
 		<?php
 		echo 'hello '. $username.'!';
 		echo '<br>';
-		echo 'You are invited to <a href="#" id="dialog-link" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-newwin"></span>'.$num.'</a> votes today!'; 
+		echo '<br>';
+		echo '<br>';
+		echo 'You are invited to <a href="#" id="dialog-link" class="ui-state-default ui-corner-all"><span id="spanVoteTaskCount">'.$num.'</span></a> votes today!'; 
 		?>
 		</div>
 <!-- ui-dialog -->
 <div id="dialog" title="Invited Votes">
+	
 	<?php
-	$row = mysql_fetch_row($result);
-	$taskId=$row[0];
-	$ownerid=$row[2];
-	$strQuestion=$row[1];
-	$strDeadline=$row[3];
-	//echo 'debug:'.$ownerid;
-	
-	$resultUser = mysql_query('select * from users WHERE id=\''.$ownerid.'\'',$link);
-	$userRow=mysql_fetch_row($resultUser);
-
-	$ownername=$userRow[1];
-	echo '<p>'.$ownername.' asks:</p><p>'.$strQuestion.'</p>';
-	
-	
-	$resultVoteItem=mysql_query('select * from vote_item WHERE task_id=\''.$taskId.'\';');
-
-	if (mysql_num_rows($resultVoteItem) > 0) {
-    while ($rowVoteItem = mysql_fetch_assoc($resultVoteItem)) {
-        echo '<img src="'.$rowVoteItem['img_url'].'" width=150 height=100 />';
-    }
-	}
+//	include "viewAndVoteForm.php";
 	?>
 </div>
 	<div id="tabs-2">
